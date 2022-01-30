@@ -1,15 +1,26 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import { createClient } from '@supabase/supabase-js';
+import { useRouter } from 'next/router';
 import React from 'react';
 import appConfig from '../config.json';
+import ButtonSticker from '../src/components/ButtonSticker/index.js'
 
+// Como fazer AJAX: https://medium.com/@omariosouto/entendendo-como-fazer-ajax-com-a-fetchapi-977ff20da3c6
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzU1NTE3MiwiZXhwIjoxOTU5MTMxMTcyfQ.fd5pBZO-3HYzVTn0AWL3XVX-g_PmOegNY9HMlALZs3k'
 const SUPABASE_URL = 'https://lvvzxnpwsppwlrtqwzgd.supabase.co'
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-
+function escutaMensagensEmTempoReal(adicionaMensagem) {
+    return supabaseClient
+        .from('mensagens')
+        .on('INSERT', (reposta) => {
+            adicionaMensagem(reposta.new)
+        })
+        .subscribe()
+}
 
 export default function ChatPage() {
+    const usuarioLogado = useRouter().query.username
     const [mensagem, setMensagem] = React.useState('')
     const [listaMensagens, setListaMensagens] = React.useState([])
 
@@ -19,9 +30,28 @@ export default function ChatPage() {
             .select('*')
             .order('id', { ascending: false })
             .then(({ data }) => {
-                console.log('Dados da Consulta:', data)
                 setListaMensagens(data)
             })
+
+        const subscription = escutaMensagensEmTempoReal((novaMensagem) => {
+            // Quero reusar um valor de referencia (objeto/array) 
+            // Passar uma função pro setState
+
+            // setListaDeMensagens([
+            //     novaMensagem,
+            //     ...listaDeMensagens
+            // ])
+            setListaMensagens((valorAtualDaLista) => {
+                return [
+                    novaMensagem,
+                    ...valorAtualDaLista,
+                ]
+            });
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        }
     }, [])
 
     /*
@@ -41,7 +71,7 @@ export default function ChatPage() {
         const msg = {
             //id: listaMensagens.length + 1, -- Não será mais necessário pq o id vem do supabase
             texto: novaMensagem,
-            de: 'gustavoopedrosa'
+            de: usuarioLogado
 
         }
 
@@ -52,11 +82,7 @@ export default function ChatPage() {
                 msg
             ])
             .then(({ data }) => {
-                console.log(data)
-                setListaMensagens([
-                    data[0],
-                    ...listaMensagens
-                ])
+
             })
         setMensagem('')
     }
@@ -68,6 +94,7 @@ export default function ChatPage() {
                 backgroundColor: appConfig.theme.colors.primary[500],
                 backgroundImage: 'url(https://wallpapercave.com/wp/wp287905.jpg)',
                 backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
+                backgroundPosition: 'center',
                 color: appConfig.theme.colors.neutrals['000']
             }}
         >
@@ -85,7 +112,7 @@ export default function ChatPage() {
                     padding: '32px',
                 }}
             >
-                <Header />
+                <Header user={usuarioLogado} />
                 <Box
                     styleSheet={{
                         position: 'relative',
@@ -142,6 +169,12 @@ export default function ChatPage() {
                                 color: appConfig.theme.colors.neutrals[200],
                             }}
                         />
+                        {/* Callback */}
+                        <ButtonSticker
+                            onStickerClick={(sticker) => {
+                                handleNovaMensagem(`:sticker: ${sticker}`)
+                            }
+                            } />
                     </Box>
                 </Box>
             </Box>
@@ -149,11 +182,14 @@ export default function ChatPage() {
     )
 }
 
-function Header() {
+function Header(props) {
     return (
         <>
-            <Box styleSheet={{ width: '100%', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} >
-                <Text variant='heading5'>
+            <Box styleSheet={{ width: '100%', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }} >
+                <Text variant='heading5' styleSheet={{ flexBasis: '100%', marginBottom: '20px' }}>
+                    Bem vindo, {props.user}!
+                </Text>
+                <Text variant='heading5' styleSheet={{selfAlign: 'center', flexGrow: '100%'}}>
                     Chat
                 </Text>
                 <Button
@@ -168,7 +204,6 @@ function Header() {
 }
 
 function MessageList(props) {
-    console.log('MessageList', props);
     return (
         <Box
             tag="ul"
@@ -224,7 +259,17 @@ function MessageList(props) {
                                 {(new Date().toLocaleDateString())}
                             </Text>
                         </Box>
-                        {mensagem.texto}
+                        {mensagem.texto.startsWith(':sticker:')
+                            ? (
+                                <Image
+                                    src={mensagem.texto.replace(':sticker:', '')}
+                                    width={100}
+                                />
+                            )
+                            : (
+                                mensagem.texto
+                            )
+                        }
                     </Text>
                 )
             })}

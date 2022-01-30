@@ -14,6 +14,7 @@ function Titulo(props) {
                     color: ${appConfig.theme.colors.neutrals['000']};
                     font-size: 24px;
                     font-weight: 600;
+                    text-transform: uppercase;
                 }
             `}
             </style>
@@ -72,7 +73,7 @@ export default function PaginaInicial() {
                         as="form"
                         onSubmit={function (event) {
                             event.preventDefault() 
-                            router.push('/chat')
+                            router.push(`/chat?username=${username}`)
                             // Um modo de mudar de página
                             // window.location.href = '/chat'
                         }}
@@ -81,8 +82,11 @@ export default function PaginaInicial() {
                             width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px', 
                         }}
                     >
-                        <Titulo tag="h2">Boas vindas de volta!</Titulo>
-                        <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
+                        <Titulo tag="h2" >Join the battle!</Titulo>
+                        <Text variant="body3" styleSheet={{ 
+                                marginBottom: '32px', 
+                                color: appConfig.theme.colors.neutrals[300],
+                            }}>
                             {appConfig.name}
                         </Text>
 
@@ -93,7 +97,7 @@ export default function PaginaInicial() {
                                 // Trocar o valor da variavel uasndo react
                                 setUsername(valor)
                             }}
-                            placeholder={username}
+                            placeholder='Nome de usuário'
                             fullWidth
                             textFieldColors={{
                                 neutral: {
