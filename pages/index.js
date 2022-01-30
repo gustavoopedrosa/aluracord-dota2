@@ -48,7 +48,7 @@ export default function PaginaInicial() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     backgroundColor: appConfig.theme.colors.primary[500],
                     backgroundImage: 'url(https://wallpapercave.com/wp/wp287905.jpg)',
-                    backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
+                    backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply', backgroundPosition: 'center',
                 }}
             >
                 <Box
@@ -63,7 +63,8 @@ export default function PaginaInicial() {
                         width: '100%', maxWidth: '700px',
                         borderRadius: '5px', padding: '32px', margin: '16px',
                         boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
-                        backgroundColor: appConfig.theme.colors.neutrals[700],
+                        backgroundColor: 'rgba(0,0,0, .7)',
+                        border: '2px solid',
                     }}
                 >
                     {/* Formulário */}
@@ -77,7 +78,7 @@ export default function PaginaInicial() {
                         }}
                         styleSheet={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
+                            width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px', 
                         }}
                     >
                         <Titulo tag="h2">Boas vindas de volta!</Titulo>
@@ -102,6 +103,7 @@ export default function PaginaInicial() {
                                     backgroundColor: appConfig.theme.colors.neutrals[800],
                                 },
                             }}
+                            styleSheet={{backgroundColor: 'rgba(0,0,0, .7)',}}
                         />
                         <Button
                             type='submit'
@@ -126,7 +128,7 @@ export default function PaginaInicial() {
                             alignItems: 'center',
                             maxWidth: '200px',
                             padding: '16px',
-                            backgroundColor: appConfig.theme.colors.neutrals[800],
+                            backgroundColor: 'rgba(0,0,0, .7)',
                             border: '1px solid',
                             borderColor: appConfig.theme.colors.neutrals[999],
                             borderRadius: '10px',

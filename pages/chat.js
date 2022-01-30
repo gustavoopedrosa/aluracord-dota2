@@ -1,10 +1,28 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
+import { createClient } from '@supabase/supabase-js';
 import React from 'react';
 import appConfig from '../config.json';
+
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzU1NTE3MiwiZXhwIjoxOTU5MTMxMTcyfQ.fd5pBZO-3HYzVTn0AWL3XVX-g_PmOegNY9HMlALZs3k'
+const SUPABASE_URL = 'https://lvvzxnpwsppwlrtqwzgd.supabase.co'
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+
 
 export default function ChatPage() {
     const [mensagem, setMensagem] = React.useState('')
     const [listaMensagens, setListaMensagens] = React.useState([])
+
+    React.useEffect(() => {
+        supabaseClient
+            .from('mensagens')
+            .select('*')
+            .order('id', { ascending: false })
+            .then(({ data }) => {
+                console.log('Dados da Consulta:', data)
+                setListaMensagens(data)
+            })
+    }, [])
 
     /*
     // Usuário
@@ -19,17 +37,27 @@ export default function ChatPage() {
     
     */
 
-    function handleKeyPress(novaMensagem) {
+    function handleNovaMensagem(novaMensagem) {
         const msg = {
-            id: listaMensagens.length + 1,
+            //id: listaMensagens.length + 1, -- Não será mais necessário pq o id vem do supabase
             texto: novaMensagem,
             de: 'gustavoopedrosa'
 
         }
-        setListaMensagens([
-            msg,
-            ...listaMensagens
-        ])
+
+        supabaseClient
+            .from('mensagens')
+            .insert([
+                //tem que ser um objeto com os MESMOS CAMPOS que você escreveu no supabase
+                msg
+            ])
+            .then(({ data }) => {
+                console.log(data)
+                setListaMensagens([
+                    data[0],
+                    ...listaMensagens
+                ])
+            })
         setMensagem('')
     }
 
@@ -73,7 +101,7 @@ export default function ChatPage() {
                     <MessageList mensagens={listaMensagens} />
 
                     {/* Aqui foi o treinamento do método map */}
-                    
+
                     {/* {listaMensagens.map((mensagemAtual, i) => {
                         console.log(mensagemAtual)
                         return (
@@ -94,7 +122,7 @@ export default function ChatPage() {
                             onKeyPress={(event) => {
                                 if (event.key === 'Enter') {
                                     event.preventDefault()
-                                    handleKeyPress(mensagem)
+                                    handleNovaMensagem(mensagem)
                                 }
                             }}
                             onChange={(event) => {
@@ -180,7 +208,7 @@ function MessageList(props) {
                                     display: 'inline-block',
                                     marginRight: '8px',
                                 }}
-                                src={`https://github.com/vanessametonini.png`}
+                                src={`https://github.com/${mensagem.de}.png`}
                             />
                             <Text tag="strong">
                                 {mensagem.de}
